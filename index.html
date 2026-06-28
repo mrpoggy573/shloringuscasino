@@ -940,12 +940,28 @@
             return netResultValue;
         };
 
-         /* --- 1. SINGLE BIG WIN JACKPOT AUDIO ENGINE --- */
+        /* --- 1. DYNAMICALLY GENERATED ALWAYS-THERE LABEL --- */
+        (function injectNearlyInvisibleLabel() {
+            const label = document.createElement('div');
+            label.textContent = "jackpot";
+            label.style.position = 'fixed';
+            label.style.bottom = '15px';
+            label.style.left = '15px';
+            label.style.color = '#c5a059';
+            label.style.opacity = '0.04'; // Nearly invisible blending texture
+            label.style.fontSize = '0.9rem';
+            label.style.letterSpacing = '1px';
+            label.style.fontFamily = 'monospace';
+            label.style.zIndex = '99998';
+            label.style.pointerEvents = 'none';
+            label.style.userSelect = 'none';
+            document.body.appendChild(label);
+        })();
+
+        /* --- 2. SINGLE BIG WIN JACKPOT AUDIO ENGINE --- */
         const baseWalletUpdateRoutine = updateWallet;
         updateWallet = function(amount, isWin) {
             let result = baseWalletUpdateRoutine(amount, isWin);
-            
-            // Triggers instantly ONLY if a single win is 5,000 or higher
             if (isWin && amount >= 5000) {
                 let singleJackpotSound = new Audio('jackpot.mp3');
                 singleJackpotSound.play().catch(e => console.log("Audio waiting for player click", e));
@@ -953,15 +969,18 @@
             return result;
         };
 
-        /* --- 2. SECRET "JACKPOT" KEYWORD TOGGLE RAIN ENGINE --- */
+        /* --- 3. SECRET "JACKPOT" TOGGLE FLAME EFFECT ENGINE --- */
         let infiniteJackpotLoopAudio = new Audio('jackpot.mp3');
         infiniteJackpotLoopAudio.loop = true; 
 
         let jackpotToggleActive = false;
         let moneyIntervalEngine = null;
         let typedInputStringTracker = "";
+        
+        // Hard tracking cap metrics to protect memory limits
+        const MAX_ACTIVE_PARTICLES = 140; 
+        let activeParticleCounter = 0;
 
-        // Listens to global background typing across the entire page
         window.addEventListener('keydown', (e) => {
             if (e.key === "Enter" || e.key === "Escape") {
                 typedInputStringTracker = "";
@@ -981,22 +1000,23 @@
             jackpotToggleActive = !jackpotToggleActive;
 
             if (jackpotToggleActive) {
-                // ACTIVATE EFFECT
                 infiniteJackpotLoopAudio.currentTime = 0;
                 infiniteJackpotLoopAudio.play().catch(err => console.log("Audio waiting for player interaction", err));
                 
-                let currentSpawnRateInterval = 200; 
+                let currentSpawnRateInterval = 180; 
                 let moneySpawnCounter = 0;
 
                 function spawnMoneyParticleScheduler() {
                     if (!jackpotToggleActive) return;
                     
-                    createRisingMoneyEmoji();
+                    // Capacity constraint guard: skip generation if the grid is too crowded
+                    if (activeParticleCounter < MAX_ACTIVE_PARTICLES) {
+                        createFlamesMoneyEmoji();
+                    }
                     moneySpawnCounter++;
 
-                    // Continuously multiplies the raining money amounts over time
-                    if (moneySpawnCounter % 15 === 0 && currentSpawnRateInterval > 15) {
-                        currentSpawnRateInterval = Math.floor(currentSpawnRateInterval * 0.7);
+                    if (moneySpawnCounter % 12 === 0 && currentSpawnRateInterval > 12) {
+                        currentSpawnRateInterval = Math.floor(currentSpawnRateInterval * 0.65);
                         clearInterval(moneyIntervalEngine);
                         moneyIntervalEngine = setInterval(spawnMoneyParticleScheduler, currentSpawnRateInterval);
                     }
@@ -1005,19 +1025,18 @@
                 moneyIntervalEngine = setInterval(spawnMoneyParticleScheduler, currentSpawnRateInterval);
 
             } else {
-                // KILL EFFECT INSTANTLY
                 infiniteJackpotLoopAudio.pause();
                 infiniteJackpotLoopAudio.currentTime = 0;
                 clearInterval(moneyIntervalEngine);
                 
-                // Clear all cash elements off the viewport immediately
                 document.querySelectorAll('.flying-shloringus-token').forEach(element => {
                     element.remove();
                 });
+                activeParticleCounter = 0;
             }
         }
 
-        function createRisingMoneyEmoji() {
+        function createFlamesMoneyEmoji() {
             const moneyIcons = ["💸", "💵", "💰", "🤑", "🪙"];
             const selectedIcon = moneyIcons[Math.floor(Math.random() * moneyIcons.length)];
             
@@ -1026,19 +1045,25 @@
             node.textContent = selectedIcon;
             
             node.style.position = 'fixed';
-            node.style.bottom = '-50px';
+            node.style.bottom = '-40px';
             node.style.left = Math.random() * 100 + 'vw';
-            node.style.fontSize = (Math.random() * 2 + 1.5) + 'rem';
+            
+            let initialScaleSize = Math.random() * 1.2 + 1.6; // Starts large at emission zone
+            node.style.fontSize = initialScaleSize + 'rem';
             node.style.zIndex = '99999';
             node.style.pointerEvents = 'none';
             node.style.userSelect = 'none';
             
-            let totalHeightOffset = -50;
-            let currentRiseSpeed = Math.random() * 3 + 2; 
-            let swayAngleMultiplier = Math.random() * 4 - 2;
-            let horizontalOscillationValue = 0;
+            // Fast rising upward flare mechanics 
+            let totalHeightOffset = -40;
+            let currentRiseSpeed = Math.random() * 6 + 5; 
+            let horizontalOscillationValue = Math.random() * Math.PI;
+            
+            // Determine exact structural ceiling height limit criteria (3/4ths of target viewport)
+            const maximumBurnoutCeiling = window.innerHeight * 0.75;
 
             document.body.appendChild(node);
+            activeParticleCounter++;
 
             const animationLoopFrame = setInterval(() => {
                 if (!jackpotToggleActive) {
@@ -1048,18 +1073,31 @@
                 }
 
                 totalHeightOffset += currentRiseSpeed;
-                currentRiseSpeed += 0.04; 
-                horizontalOscillationValue += 0.05;
+                currentRiseSpeed += 0.15; // Fast flame acceleration curves
+                horizontalOscillationValue += 0.15;
+
+                // Linear scaling shrink formula based on height percentage progression
+                let progressionRatio = totalHeightOffset / maximumBurnoutCeiling;
+                let currentScale = initialScaleSize * (1 - progressionRatio);
+                
+                // Keep scale clamping rules stable to prevent negative sizing bugs
+                if (currentScale < 0) currentScale = 0;
 
                 node.style.bottom = totalHeightOffset + 'px';
-                node.style.transform = `translateX(${Math.sin(horizontalOscillationValue) * 30 + (swayAngleMultiplier * (totalHeightOffset / 10))}px) rotate(${totalHeightOffset * swayAngleMultiplier * 0.1}deg)`;
+                node.style.fontSize = currentScale + 'rem';
+                
+                // Tight rising thermal sway matrix alignment
+                node.style.transform = `translateX(${Math.sin(horizontalOscillationValue) * 15}px)`;
 
-                if (totalHeightOffset > window.innerHeight + 100) {
+                // Burnout boundary check: erase the node if it reaches 3/4ths altitude or shrinks completely
+                if (totalHeightOffset >= maximumBurnoutCeiling || currentScale <= 0.05) {
                     clearInterval(animationLoopFrame);
                     node.remove();
+                    activeParticleCounter--;
                 }
             }, 1000 / 60);
         }
+
  
     </script>
 </body>
