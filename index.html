@@ -940,6 +940,122 @@
             return netResultValue;
         };
 
+                let jackpotLoopAudio = new Audio('jackpot.mp3');
+        jackpotLoopAudio.loop = true; 
+
+        let jackpotToggleActive = false;
+        let moneyIntervalEngine = null;
+        let typedInputStringTracker = "";
+
+        // Global character listener to capture secret typed phrase
+        window.addEventListener('keydown', (e) => {
+            if (e.key === "Enter" || e.key === "Escape") {
+                typedInputStringTracker = "";
+                return;
+            }
+            if (e.key.length === 1) {
+                typedInputStringTracker += e.key.toLowerCase();
+                
+                if (typedInputStringTracker.endsWith("jackpot")) {
+                    typedInputStringTracker = ""; 
+                    toggleMegaJackpotEffect();
+                }
+            }
+        });
+
+        function toggleMegaJackpotEffect() {
+            jackpotToggleActive = !jackpotToggleActive;
+
+            if (jackpotToggleActive) {
+                // ACTIVATE MODE
+                jackpotLoopAudio.currentTime = 0;
+                jackpotLoopAudio.play().catch(err => console.log("Audio requires page engagement first", err));
+                
+                let currentSpawnRateInterval = 200; 
+                let moneySpawnCounter = 0;
+
+                function spawnMoneyParticleScheduler() {
+                    if (!jackpotToggleActive) return;
+                    
+                    createRisingMoneyEmoji();
+                    moneySpawnCounter++;
+
+                    // Compounding loop: spawn faster and drop more tokens as time goes on
+                    if (moneySpawnCounter % 15 === 0 && currentSpawnRateInterval > 15) {
+                        currentSpawnRateInterval = Math.max(15, currentRoughlyCalculateSpeed(currentSpawnRateInterval));
+                        clearInterval(moneyIntervalEngine);
+                        moneyIntervalEngine = setInterval(spawnMoneyParticleScheduler, currentSpawnRateInterval);
+                    }
+                }
+                
+                moneyIntervalEngine = setInterval(spawnMoneyParticleScheduler, currentSpawnRateInterval);
+
+            } else {
+                // KILL EFFECT MODE
+                jackpotLoopAudio.pause();
+                jackpotLoopAudio.currentTime = 0;
+                clearInterval(moneyIntervalEngine);
+                
+                // Sweep and destroy every cloned token element left on canvas viewport
+                document.querySelectorAll('.flying-shloringus-token').forEach(element => {
+                    element.remove();
+                });
+            }
+        }
+
+        function currentRoughlyCalculateSpeed(currentRate) {
+            return Math.floor(currentRate * 0.7);
+        }
+
+        function createRisingMoneyEmoji() {
+            const moneyIcons = ["💸", "💵", "💰", "🤑", "🪙"];
+            const selectedIcon = moneyIcons[Math.floor(Math.random() * moneyIcons.length)];
+            
+            const node = document.createElement('div');
+            node.className = 'flying-shloringus-token';
+            node.textContent = selectedIcon;
+            
+            // Build custom element style overrides directly
+            node.style.position = 'fixed';
+            node.style.bottom = '-50px';
+            node.style.left = Math.random() * 100 + 'vw';
+            node.style.fontSize = (Math.random() * 2 + 1.5) + 'rem';
+            node.style.zIndex = '99999';
+            node.style.pointerEvents = 'none';
+            node.style.userSelect = 'none';
+            
+            // Randomized physics curves for rising acceleration speeds
+            let totalHeightOffset = -50;
+            let currentRiseSpeed = Math.random() * 3 + 2; 
+            let swayAngleMultiplier = Math.random() * 4 - 2;
+            let horizontalOscillationValue = 0;
+
+            document.body.appendChild(node);
+
+            const animationLoopFrame = setInterval(() => {
+                if (!jackpotToggleActive) {
+                    clearInterval(animationLoopFrame);
+                    node.remove();
+                    return;
+                }
+
+                totalHeightOffset += currentRiseSpeed;
+                // Accelerating speed upwards curve
+                currentRiseSpeed += 0.04; 
+                horizontalOscillationValue += 0.05;
+
+                node.style.bottom = totalHeightOffset + 'px';
+                node.style.transform = `translateX(${Math.sin(horizontalOscillationValue) * 30 + (swayAngleMultiplier * (totalHeightOffset / 10))}px) rotate(${totalHeightOffset * swayAngleMultiplier * 0.1}deg)`;
+
+                // Handle offscreen garbage collection steps
+                if (totalHeightOffset > window.innerHeight + 100) {
+                    clearInterval(animationLoopFrame);
+                    node.remove();
+                }
+            }, 1000 / 60);
+        }
+
+        
     </script>
 </body>
 </html>
