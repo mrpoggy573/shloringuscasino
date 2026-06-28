@@ -925,6 +925,20 @@
             }, 2500);
         }
 
+        let jackpotAudio = new Audio('jackpot.mp3');
+
+        const coreWalletRoutine = updateWallet;
+        updateWallet = function(amount, isWin) {
+            let netResultValue = coreWalletRoutine(amount, isWin);
+            
+            // Checks if a SINGLE win event is 5,000 or higher
+            if (isWin && amount >= 5000) {
+                jackpotAudio.pause();       // Stops the audio if it's already playing
+                jackpotAudio.currentTime = 0; // Rewinds to the absolute beginning
+                jackpotAudio.play().catch(e => console.log("Audio waiting for user click", e));
+            }
+            return netResultValue;
+        };
 
     </script>
 </body>
