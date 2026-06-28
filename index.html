@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shloringus Casino</title>
+    <style>
+        :root {
+            --bg-color: #0b0c10;
+            --card-bg: #1f2833;
+            --accent-gold: #c5a059;
+            --text-main: #f5f5f5;
+            --text-muted: #a4b0be;
+        }
+
+        body { 
+            font-family: 'Segoe UI', system-ui, sans-serif; 
+            background-color: var(--bg-color); 
+            color: var(--text-main);
+            margin: 0;
+            padding: 40px; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            max-width: 800px;
+        }
+
+        h1 { 
+            font-size: 3.2rem;
+            margin: 0 0 5px 0;
+            color: #fff;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            background: linear-gradient(45deg, #fff, var(--accent-gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .disclaimer {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            font-style: italic;
+            margin-bottom: 25px;
+        }
+
+        .balance-container {
+            background: #151a21;
+            padding: 14px 30px;
+            border-radius: 50px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            border: 2px solid var(--accent-gold);
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 20px rgba(197, 160, 89, 0.2);
+        }
+
+        .shloringuses-count {
+            color: var(--accent-gold);
+            text-shadow: 0 0 10px rgba(197, 160, 89, 0.4);
+        }
+
+        .grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); 
+            gap: 30px; 
+            width: 100%; 
+            max-width: 1200px; 
+            margin-bottom: 40px;
+        }
+
+        .card { 
+            background: var(--card-bg); 
+            border-radius: 24px; 
+            height: 220px;
+            position: relative;
+            cursor: pointer;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.4); 
+            transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.3s ease, border-color 0.3s ease; 
+            border: 2px solid transparent;
+            overflow: hidden;
+        }
+
+        .card:hover { 
+            transform: translateY(-8px); 
+            box-shadow: 0 15px 30px rgba(197, 160, 89, 0.3); 
+            border-color: var(--accent-gold);
+        }
+
+        .card-front {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            transition: opacity 0.25s ease, transform 0.25s ease;
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .card-back {
+            position: absolute;
+            inset: 0;
+            background: #11161d;
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            opacity: 0;
+            transform: scale(0.95);
+            transition: opacity 0.25s ease, transform 0.25s ease;
+        }
+
+        .card:hover .card-front {
+            opacity: 0;
+            transform: scale(0.95);
+        }
+
+        .card:hover .card-back {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .icon { font-size: 4rem; }
+        
+        .title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .desc {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        .game-stage {
+            display: none;
+            width: 100%;
+            max-width: 600px;
+            background: var(--card-bg);
+            border-radius: 24px;
+            padding: 30px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.5);
+            border: 1px solid #2d3139;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .back-btn {
+            background: #11161d;
+            color: var(--text-main);
+            border: 1px solid var(--accent-gold);
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        .back-btn:hover { background: var(--accent-gold); color: #000; }
+
+        input[type="number"], select {
+            background: #0b0c10;
+            border: 1px solid #374151;
+            color: #fff;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 1rem;
+            width: 140px;
+            margin: 5px;
+            text-align: center;
+        }
+        
+        .action-btn {
+            background: var(--accent-gold);
+            color: #000;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 5px;
+        }
+
+        .refill-section {
+            margin-top: 40px;
+            text-align: center;
+            width: 100%;
+        }
+
+        .refill-btn {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 14px 35px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+            transition: transform 0.2s, opacity 0.2s;
+        }
+        .refill-btn:hover { transform: scale(1.05); opacity: 0.95; }
+
+        .slots-reel { font-size: 3rem; margin: 20px 0; letter-spacing: 15px; }
+        .crash-multiplier { font-size: 3.5rem; color: #10b981; font-weight: bold; margin: 20px 0; }
+        .dice-display { font-size: 4rem; margin: 15px 0; }
+        .tower-grid { display: grid; grid-template-rows: repeat(4, 1fr); gap: 10px; margin: 20px auto; max-width: 200px; }
+        .tower-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .tower-btn { background: #11161d; border: 1px solid #374151; color: white; padding: 10px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        .tower-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        #game-log { color: #fff; font-weight: bold; min-height: 24px; margin-top: 15px; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px; }
+    </style>
+</head>
+<body>
+
+    <header id="main-header">
+        <h1>Shloringus Casino</h1>
+        <div class="disclaimer">"This is a fake money website, just for fun if you're bored"</div>
+        <div class="balance-container">
+            🪙 Wallet: <span class="shloringuses-count" id="balance-display">0</span> Shloringuses
+        </div>
+    </header>
+
+    <div class="grid" id="game-grid"></div>
+
+    <div class="game-stage" id="game-arena">
+        <button class="back-btn" onclick="exitToMenu()">⬅ Back to Casino</button>
+        <h2 id="active-game-title">Game Title</h2>
+        <div id="game-interface-zone"></div>
+        <div id="game-log"></div>
+    </div>
+
+    <div class="refill-section" id="refill-station">
+        <button class="refill-btn" onclick="manualRefill()">💰 Claim Free Refill (1,000 Shloringuses)</button>
+    </div>
+    <script>
+        const BAILOUT_AMT = 500;
+
+        function getWallet() {
+            let bal = localStorage.getItem('shloringuses_bal');
+            if (bal === null) {
+                localStorage.setItem('shloringuses_bal', 1000);
+                return 1000;
+            }
+            bal = parseInt(bal, 10);
+            if (bal <= 0) {
+                bal = BAILOUT_AMT;
+                localStorage.setItem('shloringuses_bal', bal);
+                alert(`🚨 Cleaned out! Deposited ${BAILOUT_AMT} free safety Shloringuses into your account.`);
+            }
+            return bal;
+        }
+
+        function updateWallet(amount, isWin) {
+            let current = getWallet();
+            current = isWin ? current + amount : current - amount;
+            localStorage.setItem('shloringuses_bal', current);
+            document.getElementById('balance-display').textContent = current.toLocaleString();
+            return current;
+        }
+
+        function manualRefill() {
+            let current = getWallet();
+            current += 1000;
+            localStorage.setItem('shloringuses_bal', current);
+            document.getElementById('balance-display').textContent = current.toLocaleString();
+            alert("✨ Shipment arrived! Credited +1,000 fake Shloringuses into your secure wallet.");
+        }
+
+        document.getElementById('balance-display').textContent = getWallet().toLocaleString();
+
+        const games = [
+            { id: "slots", name: "Neon Slots", emoji: "🎰", desc: "Line up matching fruits and gems. High multipliers for matching all three elements simultaneously!" },
+            { id: "plinko", name: "Plinko", emoji: "🔺", desc: "Drop a token down a peg pyramid grid. Watch it bounce randomly into varying bottom multiplier bins." },
+            { id: "crash", name: "High Crash", emoji: "📈", desc: "A multiplier ticks up rapidly. Cash out manually to secure profits before the graph instantly drops to zero!" },
+            { id: "roulette", name: "Roulette", emoji: "🎡", desc: "Wager on color parameters. Built with real-time responsive shifting momentum layouts." },
+            { id: "coin", name: "Double Flip", emoji: "🪙", desc: "Classic 50/50 prediction hazard. Double your risk input instantly or lose the entire stake." },
+            { id: "dice", name: "Cyber Dice", emoji: "🎲", desc: "Roll a 100-sided cyber die. Predict whether it rolls over or under your chosen target metric." },
+            { id: "tower", name: "The Tower", emoji: "🏰", desc: "Climb rows of mystery tiles. Pick the safe cell to advance your multiplier, but hit a bomb and lose it all!" }
+        ];
+
+        const grid = document.getElementById('game-grid');
+        games.forEach(g => {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.onclick = () => launchGame(g.id);
+            card.innerHTML = `
+                <div class="card-front">
+                    <div class="icon">${g.emoji}</div>
+                    <div class="title">${g.name}</div>
+                </div>
+                <div class="card-back">
+                    <div class="desc">${g.desc}</div>
+                </div>
+            `;
+            grid.appendChild(card);
+        });
+
+        function launchGame(id) {
+            document.getElementById('game-grid').style.display = 'none';
+            document.getElementById('refill-station').style.display = 'none';
+            const stage = document.getElementById('game-arena');
+            stage.style.display = 'block';
+            document.getElementById('game-log').textContent = 'Place your bet to begin.';
+            const selected = games.find(g => g.id === id);
+            document.getElementById('active-game-title').textContent = `${selected.emoji} ${selected.name}`;
+            
+            buildGameInterface(id);
+        }
+
+        function exitToMenu() {
+            if(window.crashInterval) clearInterval(window.crashInterval);
+            document.getElementById('game-arena').style.display = 'none';
+            document.getElementById('game-grid').style.display = 'grid';
+            document.getElementById('refill-station').style.display = 'block';
+            getWallet(); 
+        }
+
+        function checkBet(amt) {
+            if(isNaN(amt) || amt <= 0) { alert("Enter a valid bet amount!"); return false; }
+            if(amt > getWallet()) { alert("Insufficient Shloringuses balance!"); return false; }
+            return true;
+        }
+        function buildGameInterface(id) {
+            const zone = document.getElementById('game-interface-zone');
+            zone.innerHTML = ''; 
+
+            if (id === 'slots') {
+                zone.innerHTML = `
+                    <div class="slots-reel" id="reels" style="background:#0b0c10; padding:15px; border-radius:12px; border:2px solid #c5a059;">🍒 🍋 🍊</div>
+                    <input type="number" id="bet-input" value="100" min="1"><br>
+                    <button class="action-btn" onclick="playSlots()">Pull Lever</button>
+                `;
+            } 
+            else if (id === 'plinko') {
+                zone.innerHTML = `
+                    <canvas id="plinko-canvas" width="300" height="240" style="background:#0b0c10; border-radius:12px; margin-bottom:15px; border:1px solid #374151;"></canvas><br>
+                    <input type="number" id="bet-input" value="100" min="1"><br>
+                    <button class="action-btn" onclick="playPlinko()">Drop Token</button>
+                `;
+            } 
+            else if (id === 'crash') {
+                zone.innerHTML = `
+                    <div class="crash-multiplier" id="c-mult">1.00x</div>
+                    <input type="number" id="bet-input" value="100" min="1"><br>
+                    <button class="action-btn" id="c-btn" onclick="startCrash()">Start Engine</button>
+                `;
+            } 
+            else if (id === 'roulette') {
+                zone.innerHTML = `
+                    <div id="roulette-wheel-graphic" style="width:120px; height:120px; border-radius:50%; border:8px solid #c5a059; margin:15px auto; display:flex; align-items:center; justify-content:center; font-size:2.5rem; background:#0b0c10; transition: transform 1.2s cubic-bezier(0.1, 1, 0.1, 1);">🎡</div>
+                    <select id="r-choice">
+                        <option value="red">🔴 Red (2x)</option>
+                        <option value="black">⚫ Black (2x)</option>
+                        <option value="gold">🟡 Gold 0 (14x)</option>
+                    </select><br>
+                    <input type="number" id="bet-input" value="100" min="1"><br>
+                    <button class="action-btn" onclick="playRoulette()">Spin Wheel</button>
+                `;
+            } 
+            else if (id === 'coin') {
+                zone.innerHTML = `
+                    <select id="c-choice">
+                        <option value="heads">Heads</option>
+                        <option value="tails">Tails</option>
+                    </select><br>
+                    <input type="number" id="bet-input" value="100" min="1"><br>
+                    <button class="action-btn" onclick="playCoin()">Flip Coin</button>
+                `;
+            }
+            else if (id === 'dice') {
+                zone.innerHTML = `
+                    <div class="dice-display" id="d-display">🎲 --</div>
+                    <select id="d-mode">
+                        <option value="over">Roll Over</option>
+                        <option value="under">Roll Under</option>
+                    </select>
+                    <input type="number" id="d-target" value="50" min="1" max="99" style="width: 80px;"><br>
+                    <input type="number" id="bet-input" value="100" min="1"><br>
+                    <button class="action-btn" onclick="playDice()">Roll Dice</button>
+                `;
+            }
+            else if (id === 'tower') {
+                zone.innerHTML = `
+                    <div class="tower-grid">
+                        <div class="tower-row" id="t-row-3"><button class="tower-btn" onclick="playTower(3,0)" disabled>?</button><button class="tower-btn" onclick="playTower(3,1)" disabled>?</button></div>
+                        <div class="tower-row" id="t-row-2"><button class="tower-btn" onclick="playTower(2,0)" disabled>?</button><button class="tower-btn" onclick="playTower(2,1)" disabled>?</button></div>
+                        <div class="tower-row" id="t-row-1"><button class="tower-btn" onclick="playTower(1,0)" disabled>?</button><button class="tower-btn" onclick="playTower(1,1)" disabled>?</button></div>
+                        <div class="tower-row" id="t-row-0"><button class="tower-btn" onclick="playTower(0,0)" disabled>?</button><button class="tower-btn" onclick="playTower(0,1)" disabled>?</button></div>
+                    </div>
+                    <input type="number" id="bet-input" value="100" min="1"><br>
+                    <button class="action-btn" id="t-start-btn" onclick="startTower()">Lock Bet & Start</button>
+                    <button class="action-btn" id="t-cash-btn" onclick="cashTower()" style="display:none; background:#10b981; color:white;">Cash Out</button>
+                `;
+            }
+        }
+        function playSlots() {
+            const bet = parseInt(document.getElementById('bet-input').value);
+            if(!checkBet(bet)) return;
+
+            const syms = ["🍒", "🍋", "🍊", "💎", "7️⃣"];
+            const reelsElem = document.getElementById('reels');
+            
+            let ticks = 0;
+            updateWallet(bet, false);
+            document.getElementById('game-log').textContent = "🎰 Reels spinning...";
+
+            const spinInterval = setInterval(() => {
+                const r1 = syms[Math.floor(Math.random()*syms.length)];
+                const r2 = syms[Math.floor(Math.random()*syms.length)];
+                const r3 = syms[Math.floor(Math.random()*syms.length)];
+                reelsElem.textContent = `${r1} ${r2} ${r3}`;
+                ticks++;
+
+                if(ticks > 12) {
+                    clearInterval(spinInterval);
+                    
+                    if(r1 === r2 && r2 === r3) {
+                        const mult = r1 === "7️⃣" ? 10 : r1 === "💎" ? 5 : 3;
+                        updateWallet(bet * mult, true);
+                        document.getElementById('game-log').textContent = `🎉 Match 3! Won ${bet * mult} Shloringuses!`;
+                    } else if(r1 === r2 || r2 === r3 || r1 === r3) {
+                        updateWallet(Math.floor(bet * 1.5), true);
+                        document.getElementById('game-log').textContent = `✨ Match 2! Recovered ${Math.floor(bet * 1.5)} Shloringuses!`;
+                    } else {
+                        document.getElementById('game-log').textContent = `❌ No match. Lost ${bet} Shloringuses.`;
+                    }
+                }
+            }, 80);
+        }
+
+        function playPlinko() {
+            const bet = parseInt(document.getElementById('bet-input').value);
+            if(!checkBet(bet)) return;
+
+            updateWallet(bet, false);
+            const canvas = document.getElementById('plinko-canvas');
+            const ctx = canvas.getContext('2d');
+            
+            let ballX = 150;
+            let ballY = 20;
+            let ballVy = 3;
+            let ballVx = 0;
+            let currentFloorRow = 0;
+
+            const bins = [2, 1.2, 0.6, 0.4, 0.2, 0.4, 0.6, 1.2, 2];
+
+            const animInterval = setInterval(() => {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                ctx.fillStyle = "#a78bfa";
+                for(let r = 0; r < 5; r++) {
+                    let dots = r + 3;
+                    let startX = 150 - (dots - 1) * 20;
+                    for(let d = 0; d < dots; d++) {
+                        ctx.beginPath();
+                        ctx.arc(startX + d * 40, 50 + r * 35, 4, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                }
+
+                ballY += ballVy;
+                ballX += ballVx;
+                ballVx *= 0.95; 
+
+                let expectedRowY = 50 + currentFloorRow * 35;
+                if(ballY >= expectedRowY - 4 && ballY <= expectedRowY + 4 && currentFloorRow < 5) {
+                    ballVx = (Math.random() < 0.5 ? -2.5 : 2.5);
+                    currentFloorRow++;
+                }
+
+                ctx.fillStyle = "#ffd700";
+                ctx.beginPath();
+                ctx.arc(ballX, ballY, 8, 0, Math.PI * 2);
+                ctx.fill();
+
+                if(ballY >= 230) {
+                    clearInterval(animInterval);
+                    let finalBinIndex = Math.floor(ballX / (canvas.width / 9));
+                    finalBinIndex = Math.max(0, Math.min(8, finalBinIndex));
+                    
+                    const finalMult = bins[finalBinIndex];
+                    const winAmount = Math.floor(bet * finalMult);
+                    updateWallet(winAmount, true);
+                    document.getElementById('game-log').textContent = `🎯 Token landed in the ${finalMult}x bin slot! Received ${winAmount} Shloringuses.`;
+                }
+            }, 1000 / 60);
+        }
+
+        let currentMult = 1.00;
+        let crashBetValue = 0;
+        function startCrash() {
+            const btn = document.getElementById('c-btn');
+            if(btn.textContent === "Cash Out") {
+                clearInterval(window.crashInterval);
+                const finalWin = Math.floor(crashBetValue * currentMult);
+                updateWallet(finalWin - crashBetValue, true);
+                document.getElementById('game-log').textContent = `💰 Cashed out safely at ${currentMult.toFixed(2)}x! Gained ${finalWin} Shloringuses.`;
+                btn.textContent = "Start Engine";
+                return;
+            }
+
+            crashBetValue = parseInt(document.getElementById('bet-input').value);
+            if(!checkBet(crashBetValue)) return;
+
+            updateWallet(crashBetValue, false); 
+            currentMult = 1.00;
+            document.getElementById('game-log').textContent = "Flying high...";
+            btn.textContent = "Cash Out";
+
+            const crashPoint = Math.random() < 0.08 ? 1.00 : (100 / (Math.floor(Math.random() * 95) + 1)) * (Math.random() * 1.5 + 0.5);
+
+            window.crashInterval = setInterval(() => {
+                currentMult += 0.04 + (currentMult * 0.015); 
+                document.getElementById('c-mult').textContent = `${currentMult.toFixed(2)}x`;
+
+                if(currentMult >= crashPoint) {
+                    clearInterval(window.crashInterval);
+                    document.getElementById('c-mult').textContent = "💥 CRASHED";
+                    document.getElementById('game-log').textContent = `Zero values returned. Lost ${crashBetValue} Shloringuses.`;
+                    btn.textContent = "Start Engine";
+                }
+            }, 100);
+        }
+        function playRoulette() {
+            const bet = parseInt(document.getElementById('bet-input').value);
+            const choice = document.getElementById('r-choice').value;
+            if(!checkBet(bet)) return;
+
+            updateWallet(bet, false);
+            const wheel = document.getElementById('roulette-wheel-graphic');
+            
+            let randomRotationDegrees = 1440 + Math.floor(Math.random() * 360);
+            wheel.style.transform = `rotate(${randomRotationDegrees}deg)`;
+            document.getElementById('game-log').textContent = "🎡 Wheel is spinning fast...";
+
+            setTimeout(() => {
+                wheel.style.transform = "rotate(0deg)";
+                const roll = Math.floor(Math.random() * 37); 
+                let landedColor = "";
+                
+                if (roll === 0) {
+                    landedColor = "gold";
+                } else if ((roll >= 1 && roll <= 10) || (roll >= 19 && roll <= 28)) {
+                    landedColor = (roll % 2 !== 0) ? "red" : "black";
+                } else {
+                    landedColor = (roll % 2 === 0) ? "red" : "black";
+                }
+
+                let colorEmoji = landedColor === 'red' ? '🔴' : landedColor === 'black' ? '⚫' : '🟡';
+
+                if(choice === landedColor) {
+                    const mult = choice === 'gold' ? 14 : 2;
+                    const totalWin = bet * mult;
+                    updateWallet(totalWin, true);
+                    document.getElementById('game-log').textContent = `🎡 Landed on: ${colorEmoji} Number ${roll}. Match hit! Gained ${totalWin} Shloringuses.`;
+                } else {
+                    document.getElementById('game-log').textContent = `🎡 Landed on: ${colorEmoji} Number ${roll}. Condition missed. Lost ${bet} Shloringuses.`;
+                }
+            }, 1200);
+        }
+
+        function playCoin() {
+            const bet = parseInt(document.getElementById('bet-input').value);
+            const choice = document.getElementById('c-choice').value;
+            if(!checkBet(bet)) return;
+
+            const flip = Math.random() < 0.5 ? "heads" : "tails";
+            
+            if(choice === flip) {
+                updateWallet(bet, true);
+                document.getElementById('game-log').textContent = `🪙 It flipped ${flip.toUpperCase()}! Won ${bet} Shloringuses.`;
+            } else {
+                updateWallet(bet, false);
+                document.getElementById('game-log').textContent = `🪙 It flipped ${flip.toUpperCase()}! Lost ${bet} Shloringuses.`;
+            }
+        }
+
+        function playDice() {
+            const bet = parseInt(document.getElementById('bet-input').value);
+            const mode = document.getElementById('d-mode').value;
+            const target = parseInt(document.getElementById('d-target').value);
+            
+            if(!checkBet(bet)) return;
+            if(isNaN(target) || target < 1 || target > 99) return alert("Target must be between 1 and 99!");
+
+            const roll = Math.floor(Math.random() * 100) + 1;
+            document.getElementById('d-display').textContent = `🎲 ${roll}`;
+
+            let won = false;
+            let winChance = mode === "over" ? 100 - target : target;
+            let multiplier = (95 / winChance).toFixed(2);
+
+            if(mode === "over" && roll > target) won = true;
+            if(mode === "under" && roll < target) won = true;
+
+            if(won) {
+                const payout = Math.floor(bet * multiplier);
+                updateWallet(payout - bet, true);
+                document.getElementById('game-log').textContent = `🎉 Rolled ${roll}! Match hit at ${multiplier}x. Won ${payout} Shloringuses.`;
+            } else {
+                updateWallet(bet, false);
+                document.getElementById('game-log').textContent = `❌ Rolled ${roll}. Condition missed. Lost ${bet} Shloringuses.`;
+            }
+        }
+
+        let towerFloor = 0;
+        let towerBetValue = 0;
+        let towerBombs = [];
+        const towerMultipliers = [1.9, 3.8, 7.6, 15.2];
+
+        function startTower() {
+            towerBetValue = parseInt(document.getElementById('bet-input').value);
+            if(!checkBet(towerBetValue)) return;
+
+            updateWallet(towerBetValue, false); 
+            towerFloor = 0;
+            towerBombs = [];
+            
+            for(let i=0; i<4; i++) {
+                towerBombs.push(Math.floor(Math.random() * 2));
+            }
+
+            document.querySelectorAll('.tower-btn').forEach(btn => {
+                btn.textContent = "?";
+                btn.style.background = "#11161d";
+                btn.disabled = true;
+            });
+
+            document.getElementById('t-start-btn').style.display = 'none';
+            document.getElementById('t-cash-btn').style.display = 'inline-block';
+            document.getElementById('bet-input').disabled = true;
+            
+            enableTowerFloor(0);
+            document.getElementById('game-log').textContent = "Tower initiated. Select a tile on Floor 1.";
+        }
+
+        function enableTowerFloor(floor) {
+            const rowBtns = document.getElementById(`t-row-${floor}`).querySelectorAll('.tower-btn');
+            rowBtns.forEach(btn => btn.disabled = false);
+        }
+
+        function playTower(floor, choice) {
+            if(floor !== towerFloor) return;
+
+            const rowBtns = document.getElementById(`t-row-${floor}`).querySelectorAll('.tower-btn');
+            rowBtns.forEach(btn => btn.disabled = true); 
+
+            if(choice === towerBombs[floor]) {
+                rowBtns[choice].textContent = "💥";
+                rowBtns[choice].style.background = "#ff7b72";
+                document.getElementById('game-log').textContent = "💥 BOOM! Hit a hidden bomb. You lost everything on the tower climbing run.";
+                resetTowerUI();
+            } else {
+                rowBtns[choice].textContent = "💎";
+                rowBtns[choice].style.background = "#10b981";
+                
+                let currentTotalPayout = Math.floor(towerBetValue * towerMultipliers[floor]);
+                document.getElementById('game-log').textContent = `💎 Floor ${floor + 1} cleared! Current lock-in value: ${currentTotalPayout} Shloringuses.`;
+                
+                if(floor === 3) {
+                    cashTower();
+                } else {
+                    towerFloor++;
+                    enableTowerFloor(towerFloor);
+                }
+            }
+        }
+
+        function cashTower() {
+            if(towerFloor === 0 && document.getElementById('t-start-btn').style.display !== 'none') return;
+            let finalPayout = Math.floor(towerBetValue * towerMultipliers[towerFloor === 0 ? 0 : towerFloor - 1]);
+            if(towerFloor > 0) {
+                updateWallet(finalPayout, true);
+                document.getElementById('game-log').textContent = `🏰 Escaped the Tower! Safely collected ${finalPayout} Shloringuses at a solid multiplier grid tier.`;
+            }
+            resetTowerUI();
+        }
+
+        function resetTowerUI() {
+            document.getElementById('t-start-btn').style.display = 'inline-block';
+            document.getElementById('t-cash-btn').style.display = 'none';
+            document.getElementById('bet-input').disabled = false;
+            document.querySelectorAll('.tower-btn').forEach(btn => btn.disabled = true);
+        }
+
+        /* --- Visual Color Wheel Patch --- */
+        if (typeof games !== 'undefined') {
+            const rouletteGame = games.find(g => g.id === "roulette");
+            if (rouletteGame) {
+                rouletteGame.desc = "Wager Shloringuses on colors. Watch the premium graphic wheel spin to land on your prize track!";
+            }
+        }
+
+        buildGameInterface = function(id) {
+            const zone = document.getElementById('game-interface-zone');
+            zone.innerHTML = ''; 
+
+            if (id === 'slots') {
+                zone.innerHTML = `
+                    <div class="slots-reel" id="reels" style="background:#0b0c10; padding:15px; border-radius:12px; border:2px solid #c5a059;">🍒 🍋 🍊</div>
+                    <input type="number" id="bet-input" value="100" min="1"><br>
+                    <button class="action-btn" onclick="playSlots()">Pull Lever</button>
+                `;
+            } 
+            else if (id === 'plinko') {
+                zone.innerHTML = `
+                    <canvas id="plinko-canvas" width="300" height="240" style="background:#0b0c10; border-radius:12px; margin-bottom:15px; border:1px solid #374151;"></canvas><br>
+                    <input type="number" id="bet-input" value="100" min="1"><br>
+                    <button class="action-btn" onclick="playPlinko()">Drop Token</button>
+                `;
+            } 
+            else if (id === 'crash') {
+                zone.innerHTML = `
+                    <div class="crash-multiplier" id="c-mult">1.00x</div>
+                    <input type="number" id="bet-input" value="100" min="1"><br>
+                    <button class="action-btn" id="c-btn" onclick="startCrash()">Start Engine</button>
+                `;
+            } 
+            else if (id === 'roulette') {
+                zone.innerHTML = `
+                    <div id="roulette-wheel-container" style="position: relative; width: 140px; height: 140px; margin: 15px auto;">
+                        <div id="roulette-wheel-graphic" style="width:100%; height:100%; border-radius:50%; background: conic-gradient(#ff7b72 0% 45%, #1f242c 45% 90%, #ff7b72 90% 135%, #1f242c 135% 180%, #ff7b72 180% 225%, #1f242c 225% 270%, #ff7b72 270% 315%, #1f242c 315% 350%, #ffd700 350% 360%); border:4px solid #c5a059; box-sizing: border-box; transition: transform 2.5s cubic-bezier(0.1, 1, 0.1, 1);"></div>
+                        <div id="roulette-pointer" style="position: absolute; top: -10px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 10px solid transparent; border-right: 10px solid transparent; border-top: 15px solid #ffd700; z-index: 10;"></div>
+                    </div>
+                    <select id="r-choice">
+                        <option value="red">🔴 Red (2x)</option>
+                        <option value="black">⚫ Black (2x)</option>
+                        <option value="gold">🟡 Gold 0 (14x)</option>
+                    </select><br>
+                    <input type="number" id="bet-input" value="100" min="1"><br>
+                    <button class="action-btn" onclick="playRoulette()">Spin Wheel</button>
+                `;
+            } 
+            else if (id === 'coin') {
+                zone.innerHTML = `
+                    <select id="c-choice">
+                        <option value="heads">Heads</option>
+                        <option value="tails">Tails</option>
+                    </select><br>
+                    <input type="number" id="bet-input" value="100" min="1"><br>
+                    <button class="action-btn" onclick="playCoin()">Flip Coin</button>
+                `;
+            }
+            else if (id === 'dice') {
+                zone.innerHTML = `
+                    <div class="dice-display" id="d-display">🎲 --</div>
+                    <select id="d-mode">
+                        <option value="over">Roll Over</option>
+                        <option value="under">Roll Under</option>
+                    </select>
+                    <input type="number" id="d-target" value="50" min="1" max="99" style="width: 80px;"><br>
+                    <input type="number" id="bet-input" value="100" min="1"><br>
+                    <button class="action-btn" onclick="playDice()">Roll Dice</button>
+                `;
+            }
+            else if (id === 'tower') {
+                zone.innerHTML = `
+                    <div class="tower-grid">
+                        <div class="tower-row" id="t-row-3"><button class="tower-btn" onclick="playTower(3,0)" disabled>?</button><button class="tower-btn" onclick="playTower(3,1)" disabled>?</button></div>
+                        <div class="tower-row" id="t-row-2"><button class="tower-btn" onclick="playTower(2,0)" disabled>?</button><button class="tower-btn" onclick="playTower(2,1)" disabled>?</button></div>
+                        <div class="tower-row" id="t-row-1"><button class="tower-btn" onclick="playTower(1,0)" disabled>?</button><button class="tower-btn" onclick="playTower(1,1)" disabled>?</button></div>
+                        <div class="tower-row" id="t-row-0"><button class="tower-btn" onclick="playTower(0,0)" disabled>?</button><button class="tower-btn" onclick="playTower(0,1)" disabled>?</button></div>
+                    </div>
+                    <input type="number" id="bet-input" value="100" min="1"><br>
+                    <button class="action-btn" id="t-start-btn" onclick="startTower()">Lock Bet & Start</button>
+                    <button class="action-btn" id="t-cash-btn" onclick="cashTower()" style="display:none; background:#10b981; color:white;">Cash Out</button>
+                `;
+            }
+        }
+
+        /* --- Fully Synced Color Wheel Patch --- */
+        if (typeof games !== 'undefined') {
+            const rouletteGame = games.find(g => g.id === "roulette");
+            if (rouletteGame) {
+                rouletteGame.desc = "Wager Shloringuses on colors. Watch the precision 37-pocket graphic wheel spin to land on your prize track!";
+            }
+        }
+
+        buildGameInterface = function(id) {
+            const zone = document.getElementById('game-interface-zone');
+            zone.innerHTML = ''; 
+
+            if (id === 'slots') {
+                zone.innerHTML = `
+                    <div class="slots-reel" id="reels" style="background:#0b0c10; padding:15px; border-radius:12px; border:2px solid #c5a059;">🍒 🍋 🍊</div>
+                    <input type="number" id="bet-input" value="100" min="1"><br>
+                    <button class="action-btn" onclick="playSlots()">Pull Lever</button>
+                `;
+            } 
+            else if (id === 'plinko') {
+                zone.innerHTML = `
+                    <canvas id="plinko-canvas" width="300" height="240" style="background:#0b0c10; border-radius:12px; margin-bottom:15px; border:1px solid #374151;"></canvas><br>
+                    <input type="number" id="bet-input" value="100" min="1"><br>
+                    <button class="action-btn" onclick="playPlinko()">Drop Token</button>
+                `;
+            } 
+            else if (id === 'crash') {
+                zone.innerHTML = `
+                    <div class="crash-multiplier" id="c-mult">1.00x</div>
+                    <input type="number" id="bet-input" value="100" min="1"><br>
+                    <button class="action-btn" id="c-btn" onclick="startCrash()">Start Engine</button>
+                `;
+            } 
+            else if (id === 'roulette') {
+                // Build a 37-slice alternating conic gradient (approx 9.73 degrees per pocket)
+                let gradientParts = [];
+                for (let i = 0; i < 37; i++) {
+                    let startAng = (i * (360 / 37)).toFixed(2);
+                    let endAng = ((i + 1) * (360 / 37)).toFixed(2);
+                    let col = i === 0 ? "#ffd700" : (i % 2 === 0 ? "#1f242c" : "#ff7b72");
+                    gradientParts.push(`${col} ${startAng}deg ${endAng}deg`);
+                }
+                let wheelStyle = `background: conic-gradient(${gradientParts.join(', ')});`;
+
+                zone.innerHTML = `
+                    <div id="roulette-wheel-container" style="position: relative; width: 160px; height: 160px; margin: 15px auto;">
+                        <div id="roulette-wheel-graphic" style="width:100%; height:100%; border-radius:50%; ${wheelStyle} border:4px solid #c5a059; box-sizing: border-box; transition: transform 2.5s cubic-bezier(0.15, 0.85, 0.35, 1);"></div>
+                        <div id="roulette-pointer" style="position: absolute; top: -10px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 10px solid transparent; border-right: 10px solid transparent; border-top: 15px solid #ffd700; z-index: 10;"></div>
+                    </div>
+                    <select id="r-choice">
+                        <option value="red">🔴 Red (2x)</option>
+                        <option value="black">⚫ Black (2x)</option>
+                        <option value="gold">🟡 Gold 0 (14x)</option>
+                    </select><br>
+                    <input type="number" id="bet-input" value="100" min="1"><br>
+                    <button class="action-btn" onclick="playRoulette()">Spin Wheel</button>
+                `;
+            } 
+            else if (id === 'coin') {
+                zone.innerHTML = `
+                    <select id="c-choice">
+                        <option value="heads">Heads</option>
+                        <option value="tails">Tails</option>
+                    </select><br>
+                    <input type="number" id="bet-input" value="100" min="1"><br>
+                    <button class="action-btn" onclick="playCoin()">Flip Coin</button>
+                `;
+            }
+            else if (id === 'dice') {
+                zone.innerHTML = `
+                    <div class="dice-display" id="d-display">🎲 --</div>
+                    <select id="d-mode">
+                        <option value="over">Roll Over</option>
+                        <option value="under">Roll Under</option>
+                    </select>
+                    <input type="number" id="d-target" value="50" min="1" max="99" style="width: 80px;"><br>
+                    <input type="number" id="bet-input" value="100" min="1"><br>
+                    <button class="action-btn" onclick="playDice()">Roll Dice</button>
+                `;
+            }
+            else if (id === 'tower') {
+                zone.innerHTML = `
+                    <div class="tower-grid">
+                        <div class="tower-row" id="t-row-3"><button class="tower-btn" onclick="playTower(3,0)" disabled>?</button><button class="tower-btn" onclick="playTower(3,1)" disabled>?</button></div>
+                        <div class="tower-row" id="t-row-2"><button class="tower-btn" onclick="playTower(2,0)" disabled>?</button><button class="tower-btn" onclick="playTower(2,1)" disabled>?</button></div>
+                        <div class="tower-row" id="t-row-1"><button class="tower-btn" onclick="playTower(1,0)" disabled>?</button><button class="tower-btn" onclick="playTower(1,1)" disabled>?</button></div>
+                        <div class="tower-row" id="t-row-0"><button class="tower-btn" onclick="playTower(0,0)" disabled>?</button><button class="tower-btn" onclick="playTower(0,1)" disabled>?</button></div>
+                    </div>
+                    <input type="number" id="bet-input" value="100" min="1"><br>
+                    <button class="action-btn" id="t-start-btn" onclick="startTower()">Lock Bet & Start</button>
+                    <button class="action-btn" id="t-cash-btn" onclick="cashTower()" style="display:none; background:#10b981; color:white;">Cash Out</button>
+                `;
+            }
+        }
+
+        let customRouletteTally = 0;
+
+        playRoulette = function() {
+            const bet = parseInt(document.getElementById('bet-input').value);
+            const choice = document.getElementById('r-choice').value;
+            if(!checkBet(bet)) return;
+
+            updateWallet(bet, false);
+            const wheel = document.getElementById('roulette-wheel-graphic');
+            
+            // Pick a pocket from 0 to 36
+            const winningPocketIndex = Math.floor(Math.random() * 37);
+            let landedColor = "";
+
+            if (winningPocketIndex === 0) {
+                landedColor = "gold";
+            } else {
+                landedColor = (winningPocketIndex % 2 === 0) ? "black" : "red";
+            }
+
+            // Map index directly to layout angles
+            const degreesPerPocket = 360 / 37;
+            const targetAngle = winningPocketIndex * degreesPerPocket + (degreesPerPocket / 2);
+
+            // Spin multi-rotations forward and anchor pointer at top 12 o'clock (0 degrees)
+            customRouletteTally += 1800 + (360 - (customRouletteTally % 360)) - targetAngle;
+            
+            if (wheel) {
+                wheel.style.transform = `rotate(${customRouletteTally}deg)`;
+            }
+            document.getElementById('game-log').textContent = "🎡 Wheel is spinning...";
+
+            setTimeout(() => {
+                let colorEmoji = landedColor === 'red' ? '🔴 Red' : landedColor === 'black' ? '⚫ Black' : '🟡 Gold Zero';
+
+                if(choice === landedColor) {
+                    const mult = choice === 'gold' ? 14 : 2;
+                    const totalWin = bet * mult;
+                    updateWallet(totalWin, true);
+                    document.getElementById('game-log').textContent = `🎡 Result: Stopped on pocket #${winningPocketIndex} (${colorEmoji}). Winner! +${totalWin} Shloringuses!`;
+                } else {
+                    document.getElementById('game-log').textContent = `🎡 Result: Stopped on pocket #${winningPocketIndex} (${colorEmoji}). Missed! Lost ${bet} Shloringuses.`;
+                }
+            }, 2500);
+        }
+
+
+    </script>
+</body>
+</html>
