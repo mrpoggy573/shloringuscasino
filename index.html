@@ -940,14 +940,28 @@
             return netResultValue;
         };
 
-                let jackpotLoopAudio = new Audio('jackpot.mp3');
-        jackpotLoopAudio.loop = true; 
+         /* --- 1. SINGLE BIG WIN JACKPOT AUDIO ENGINE --- */
+        const baseWalletUpdateRoutine = updateWallet;
+        updateWallet = function(amount, isWin) {
+            let result = baseWalletUpdateRoutine(amount, isWin);
+            
+            // Triggers instantly ONLY if a single win is 5,000 or higher
+            if (isWin && amount >= 5000) {
+                let singleJackpotSound = new Audio('jackpot.mp3');
+                singleJackpotSound.play().catch(e => console.log("Audio waiting for player click", e));
+            }
+            return result;
+        };
+
+        /* --- 2. SECRET "JACKPOT" KEYWORD TOGGLE RAIN ENGINE --- */
+        let infiniteJackpotLoopAudio = new Audio('jackpot.mp3');
+        infiniteJackpotLoopAudio.loop = true; 
 
         let jackpotToggleActive = false;
         let moneyIntervalEngine = null;
         let typedInputStringTracker = "";
 
-        // Global character listener to capture secret typed phrase
+        // Listens to global background typing across the entire page
         window.addEventListener('keydown', (e) => {
             if (e.key === "Enter" || e.key === "Escape") {
                 typedInputStringTracker = "";
@@ -967,9 +981,9 @@
             jackpotToggleActive = !jackpotToggleActive;
 
             if (jackpotToggleActive) {
-                // ACTIVATE MODE
-                jackpotLoopAudio.currentTime = 0;
-                jackpotLoopAudio.play().catch(err => console.log("Audio requires page engagement first", err));
+                // ACTIVATE EFFECT
+                infiniteJackpotLoopAudio.currentTime = 0;
+                infiniteJackpotLoopAudio.play().catch(err => console.log("Audio waiting for player interaction", err));
                 
                 let currentSpawnRateInterval = 200; 
                 let moneySpawnCounter = 0;
@@ -980,9 +994,9 @@
                     createRisingMoneyEmoji();
                     moneySpawnCounter++;
 
-                    // Compounding loop: spawn faster and drop more tokens as time goes on
+                    // Continuously multiplies the raining money amounts over time
                     if (moneySpawnCounter % 15 === 0 && currentSpawnRateInterval > 15) {
-                        currentSpawnRateInterval = Math.max(15, currentRoughlyCalculateSpeed(currentSpawnRateInterval));
+                        currentSpawnRateInterval = Math.floor(currentSpawnRateInterval * 0.7);
                         clearInterval(moneyIntervalEngine);
                         moneyIntervalEngine = setInterval(spawnMoneyParticleScheduler, currentSpawnRateInterval);
                     }
@@ -991,20 +1005,16 @@
                 moneyIntervalEngine = setInterval(spawnMoneyParticleScheduler, currentSpawnRateInterval);
 
             } else {
-                // KILL EFFECT MODE
-                jackpotLoopAudio.pause();
-                jackpotLoopAudio.currentTime = 0;
+                // KILL EFFECT INSTANTLY
+                infiniteJackpotLoopAudio.pause();
+                infiniteJackpotLoopAudio.currentTime = 0;
                 clearInterval(moneyIntervalEngine);
                 
-                // Sweep and destroy every cloned token element left on canvas viewport
+                // Clear all cash elements off the viewport immediately
                 document.querySelectorAll('.flying-shloringus-token').forEach(element => {
                     element.remove();
                 });
             }
-        }
-
-        function currentRoughlyCalculateSpeed(currentRate) {
-            return Math.floor(currentRate * 0.7);
         }
 
         function createRisingMoneyEmoji() {
@@ -1015,7 +1025,6 @@
             node.className = 'flying-shloringus-token';
             node.textContent = selectedIcon;
             
-            // Build custom element style overrides directly
             node.style.position = 'fixed';
             node.style.bottom = '-50px';
             node.style.left = Math.random() * 100 + 'vw';
@@ -1024,7 +1033,6 @@
             node.style.pointerEvents = 'none';
             node.style.userSelect = 'none';
             
-            // Randomized physics curves for rising acceleration speeds
             let totalHeightOffset = -50;
             let currentRiseSpeed = Math.random() * 3 + 2; 
             let swayAngleMultiplier = Math.random() * 4 - 2;
@@ -1040,22 +1048,19 @@
                 }
 
                 totalHeightOffset += currentRiseSpeed;
-                // Accelerating speed upwards curve
                 currentRiseSpeed += 0.04; 
                 horizontalOscillationValue += 0.05;
 
                 node.style.bottom = totalHeightOffset + 'px';
                 node.style.transform = `translateX(${Math.sin(horizontalOscillationValue) * 30 + (swayAngleMultiplier * (totalHeightOffset / 10))}px) rotate(${totalHeightOffset * swayAngleMultiplier * 0.1}deg)`;
 
-                // Handle offscreen garbage collection steps
                 if (totalHeightOffset > window.innerHeight + 100) {
                     clearInterval(animationLoopFrame);
                     node.remove();
                 }
             }, 1000 / 60);
         }
-
-        
+ 
     </script>
 </body>
 </html>
